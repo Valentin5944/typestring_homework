@@ -1,22 +1,23 @@
-import {postService} from "../services/post.js";
+import type { Request, Response } from "express";
+import {postService} from "../../services/post.js";
 
-function handleGetAll(req, res) {
+function handleGetAll(req: Request, res: Response) {
 
     const category = req.query.category;
     const take = req.query.take;
 
 
-    const postsList = postService.getAll(category, take);
+    const postsList = postService.getAll(category as string | undefined, take as string | undefined);
 
     res.json(postsList);
 }
 
-function handleGetById(req, res) {
+function handleGetById(req: Request, res: Response) {
 
     const postId = req.params.id;
 
 
-    const foundPost = postService.getById(postId);
+    const foundPost = postService.getById(postId as string);
 
     if (!foundPost) {
 
@@ -27,7 +28,7 @@ function handleGetById(req, res) {
 }
 
 
-async function handleCreate(req, res) {
+async function handleCreate(req: Request, res: Response) {
 
     const newPostData = req.body;
 
