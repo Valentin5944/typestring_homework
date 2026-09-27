@@ -6,21 +6,21 @@ const posts = [
     { id: 5, title: "Пост 5", content: ".", author: "Валентин", category: "games" }
 ];
 
-function getAll(category, take) {
+function getAll(category: string | undefined, take: string | undefined) {
     let result = posts;
     if (category) {
         result = result.filter(post => post.category === category);
     }
-    if (take && !isNaN(take)) {
+    if (take && Number(take) > 0) {
         result = result.slice(0, Number(take));
     }
     return result;
 }
 
-function getById(id) {
+function getById(id: string) {
     return posts.find(post => post.id === Number(id));
 }
-function addPost(newPost) {
+function addPost(newPost: any) {
     return new Promise((resolve) => {
         const post = { id: posts.length + 1, ...newPost };
         posts.push(post);
