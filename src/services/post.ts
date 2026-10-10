@@ -5,16 +5,16 @@ import type { Post } from "../domen/post/entity.js";
 
 
 export function createPostService(postRepository: PostRepository): PostService {
-    const getAll = (category: string | undefined, take: string | undefined): Post[] => {
-        return postRepository.getAll(category, take);
+    const getAll = async (category: string | undefined, take: string | undefined): Promise<Post[]> => {
+        return await postRepository.getAll(category, take);
     };
 
-    const getById = (id: string): Post | undefined => {
-        return postRepository.getById(id);
+    const getById = async (id: string): Promise<Post | undefined> => {
+        return await postRepository.getById(id);
     };
 
-    const createPost = (newPost: CreatePostRequest): Promise<Post> => {
-        return postRepository.addPost(newPost);
+    const createPost = async (newPost: CreatePostRequest): Promise<Post> => {
+        return await postRepository.addPost(newPost);
     };
 
     return { getAll, getById, createPost };
