@@ -6,4 +6,5 @@ export interface PostRepository {
     getById(id: string): Promise<Post | undefined>;
     addPost(data: NewPostData): Promise<Post>;
     findCategoryByName(name: string): Promise<PostCategory | undefined>;
+    getByAuthorId(authorId: number): Promise<Post[]>;
 }

@@ -42,6 +42,9 @@ export function createPostRepository(db: any): PostRepository {
         const category = await db.orm.public.Category.where({ name }).first();
         return category || undefined;
     }
+    async function getByAuthorId(authorId: number): Promise<Post[]> {
+    return await withRelations().where({ authorId }).all();
+}
 
-    return { getAll, getById, addPost, findCategoryByName };
+    return { getAll, getById, addPost, findCategoryByName, getByAuthorId };
 }

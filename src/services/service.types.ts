@@ -6,6 +6,7 @@ export interface PostService {
     getAll(category?: string, take?: string): Promise<Post[]>;
     getById(id: string): Promise<Post | undefined>;
     createPost(newPost: CreatePostRequest): Promise<Post>;
+    getByAuthorId(authorId: number): Promise<Post[]>;
 }
 export interface LoginResult {
     user: PublicUser;

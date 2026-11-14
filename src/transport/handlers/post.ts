@@ -35,19 +35,18 @@ export function createPostHandler(postService: PostService): PostHandler {
         try {
             const createdPost = await postService.createPost({ title, content, category, authorId });
             return res.status(201).json(createdPost);
-        } catch (err) {
-            return sendError(res, err);
+        } catch (error) {
+            return sendError(res, error);
         }
     }
 
     async function handleGetMyPosts(req: AuthenticatedRequest, res: Response): Promise<void | Response> {
-        if (!req.user) {
-            return res.status(401).json({ error: "Unauthorized" });
-        }
-        const userId = req.user.userId;
-        const allPosts = await postService.getAll();
-        return res.json(allPosts.filter((post) => post.authorId === userId));
+    if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
     }
+    const myPosts = await postService.getByAuthorId(req.user.userId);
+    return res.json(myPosts);
+}
 
     return { handleGetAll, handleGetById, handleCreate, handleGetMyPosts };
 }
