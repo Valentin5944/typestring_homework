@@ -8,7 +8,7 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
-  const token = req.cookies.accessToken;
+  const token = req.cookies?.accessToken;
 
   if (!token) {
     res.status(401).json({ error: "Unauthorized: Token missing" });

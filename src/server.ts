@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser"
 import { db } from "./prisma/db.js"; 
 import { createPostRepository } from "./repositories/post.js";
@@ -15,6 +16,7 @@ import { createAuthHandler } from "./transport/handlers/auth.js";
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({ origin: "http://localhost:5173" }));
 
 const userRepository = createUserRepository(db);
 const postRepository = createPostRepository(db); 

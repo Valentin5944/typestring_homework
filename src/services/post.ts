@@ -33,6 +33,9 @@ export function createPostService(postRepository: PostRepository, userRepository
             categoryId: category.id
         });
     };
+    const getByAuthorId = async (authorId: number): Promise<Post[]> => {
+    return await postRepository.getByAuthorId(authorId);
+    };
 
-    return { getAll, getById, createPost };
+    return { getAll, getById, createPost, getByAuthorId };
 }
