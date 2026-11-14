@@ -1,36 +1,53 @@
 import type { Request, Response } from "express";
 import type { PostService } from "../../services/service.types.js";
 import type { PostHandler } from "./handler.types.js";
-import type { CreatePostRequest } from "../dto/requests.js";
+import type { AuthenticatedRequest } from "../middlewares/auth.js";
+import type { CreatePostRequest, FilterPostQuery } from "../dto/requests.js";
+import { sendError } from "./auth.js";
 
 
 export function createPostHandler(postService: PostService): PostHandler {
-    async function handleGetAll(req: Request<any, any, any, { category?: string; take?: string }>, res: Response): Promise<void | Response> {
+    async function handleGetAll(req: Request<{}, any, any, FilterPostQuery>, res: Response): Promise<void | Response> {
         const { category, take } = req.query;
         const postsList = await postService.getAll(category, take);
         return res.json(postsList);
     }
 
     async function handleGetById(req: Request<{ id: string }>, res: Response): Promise<void | Response> {
-        const postId = req.params.id;
-        const foundPost = await postService.getById(postId);
+        const foundPost = await postService.getById(req.params.id);
 
         if (!foundPost) {
-            return res.status(404).json({ error: "Пост не найден" });
+            return res.status(404).json({ error: "Post not found" });
         }
-
         return res.json(foundPost);
     }
 
-    async function handleCreate(req: Request<any, any, CreatePostRequest>, res: Response): Promise<void | Response> {
-        const newPostData = req.body;
-        if (!newPostData.title || !newPostData.content) {
-            return res.status(422).json({ error: "Нет title или content" });
+    async function handleCreate(req: Request<{}, any, Partial<CreatePostRequest>>, res: Response): Promise<void | Response> {
+        const { title, content, category, authorId } = req.body ?? {};
+
+        if (!title || !content || !category) {
+            return res.status(422).json({ error: "Title, content and category are required" });
+        }
+        if (typeof authorId !== "number" || !Number.isInteger(authorId)) {
+            return res.status(422).json({ error: "Number needed" });
         }
 
-        const createdPost = await postService.createPost(newPostData);
-        return res.status(201).json(createdPost);
+        try {
+            const createdPost = await postService.createPost({ title, content, category, authorId });
+            return res.status(201).json(createdPost);
+        } catch (err) {
+            return sendError(res, err);
+        }
     }
 
-    return { handleGetAll, handleGetById, handleCreate };
+    async function handleGetMyPosts(req: AuthenticatedRequest, res: Response): Promise<void | Response> {
+        if (!req.user) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        const userId = req.user.userId;
+        const allPosts = await postService.getAll();
+        return res.json(allPosts.filter((post) => post.authorId === userId));
+    }
+
+    return { handleGetAll, handleGetById, handleCreate, handleGetMyPosts };
 }
