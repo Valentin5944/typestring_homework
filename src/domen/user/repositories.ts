@@ -1,7 +1,7 @@
 import type { CreateUserData, User } from "./entity.js";
 
 export interface UserRepository {
-    findByEmail(email: string): Promise<User | undefined>;
-    findById(id: number): Promise<User | undefined>;
+    findByEmail(email: string): Promise<User | null>;
+    findById(id: number): Promise<User | null>;
     create(data: CreateUserData): Promise<User>;
 }

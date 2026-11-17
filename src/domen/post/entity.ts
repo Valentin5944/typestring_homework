@@ -2,10 +2,11 @@ export interface Post {
     id: number;
     title: string;
     content: string;
+    createdAt: Date;
     authorId: number;
     categoryId: number;
-    author: PostAuthor;
-    category: PostCategory;
+    author: PostAuthor | null;
+    category: PostCategory | null;
 }
 export interface PostCategory {
     id: number;

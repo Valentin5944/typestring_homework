@@ -4,7 +4,7 @@ import type { CreatePostRequest, LoginRequest, RegisterRequest } from "../transp
 
 export interface PostService {
     getAll(category?: string, take?: string): Promise<Post[]>;
-    getById(id: string): Promise<Post | undefined>;
+    getById(id: string): Promise<Post | null>;
     createPost(newPost: CreatePostRequest): Promise<Post>;
     getByAuthorId(authorId: number): Promise<Post[]>;
 }

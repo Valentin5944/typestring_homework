@@ -11,7 +11,7 @@ export function createPostService(postRepository: PostRepository, userRepository
         return await postRepository.getAll(category, take);
     };
 
-    const getById = async (id: string): Promise<Post | undefined> => {
+    const getById = async (id: string): Promise<Post | null> => {
         return await postRepository.getById(id);
     };
 

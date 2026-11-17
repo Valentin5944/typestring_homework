@@ -1,23 +1,23 @@
 import type { UserRepository } from "../domen/user/repositories.js";
 import type { CreateUserData, User } from "../domen/user/entity.js";
 
-export function createUserRepository(db: any): UserRepository {
-    async function findByEmail(email: string): Promise<User | undefined> {
-        const user = await db.orm.public.User.where({ email }).first();
-        return user || undefined;
-    }
+type Database = typeof import("../prisma/db.js").db;
 
-    async function findById(id: number): Promise<User | undefined> {
-        const user = await db.orm.public.User.where({ id }).first();
-        return user || undefined;
-    }
+export function createUserRepository(db: Database): UserRepository {
+    return {
+        async findByEmail(email) {
+            return await db.orm.public.User.where({ email }).first();
+        },
 
-    async function create(data: CreateUserData): Promise<User> {
-        return await db.orm.public.User.create({
-            email: data.email,
-            password: data.password
-        });
-    }
+        async findById(id) {
+            return await db.orm.public.User.where({ id }).first();
+        },
 
-    return { findByEmail, findById, create };
+        async create(data) {
+            return await db.orm.public.User.create({
+                email: data.email,
+                password: data.password,
+            });
+        },
+    };
 }
