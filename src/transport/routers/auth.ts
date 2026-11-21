@@ -9,6 +9,7 @@ export function createAuthRouter(authHandler: AuthHandler): Router {
     router.post("/login", authHandler.handleLogin);
     router.post("/refresh", authHandler.handleRefresh);
     router.get("/me", requireAuth, authHandler.handleGetMe);
+    router.post("/logout", authHandler.handleLogout);
 
     return router;
 }

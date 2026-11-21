@@ -1,5 +1,6 @@
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+import { createHash, randomUUID } from "node:crypto";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -30,8 +31,17 @@ export function generateAccessToken(userId: number, email: string): string {
   return jwt.sign({ userId, email }, ACCESS_SECRET, { expiresIn: "15m" });
 }
 
+export const REFRESH_EXPIRE = 7 * 24 * 60 * 60;
+
 export function generateRefreshToken(userId: number, email: string): string {
-  return jwt.sign({ userId, email }, REFRESH_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ userId, email }, REFRESH_SECRET, {
+    expiresIn: REFRESH_EXPIRE,
+    jwtid: randomUUID(),
+  });
+}
+
+export function hashRefreshToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }
 
 export function verifyAccessToken(token: string): TokenPayload | null {

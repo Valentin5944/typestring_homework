@@ -1,5 +1,5 @@
-import type { UserRepository } from "../domen/user/repositories.js";
-import type { CreateUserData, User } from "../domen/user/entity.js";
+import type { UserRepository } from "../domain/user/repositories.js";
+import type { CreateUserData, User } from "../domain/user/entity.js";
 
 type Database = typeof import("../prisma/db.js").db;
 

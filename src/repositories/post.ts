@@ -1,6 +1,6 @@
-import type { PostRepository } from "../domen/post/repositories.js";
+import type { PostRepository } from "../domain/post/repositories.js";
 import type { CreatePostRequest } from "../transport/dto/requests.js";
-import type { NewPostData, Post, PostCategory } from "../domen/post/entity.js";
+import type { NewPostData, Post, PostCategory } from "../domain/post/entity.js";
 
 type Database = typeof import("../prisma/db.js").db;
 
@@ -30,7 +30,6 @@ export function createPostRepository(db: Database): PostRepository {
             }
             return await query.all();
         },
-
         async getById(id) {
             return await withRelations().where({ id: Number(id) }).first();
         },

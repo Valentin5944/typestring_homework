@@ -14,4 +14,5 @@ export interface AuthHandler {
     handleLogin(req: Request<{}, any, Partial<LoginRequest>>, res: Response): Result;
     handleRefresh(req: Request, res: Response): Result;
     handleGetMe(req: AuthenticatedRequest, res: Response): Result;
+    handleLogout(req: Request, res: Response): Result;
 }

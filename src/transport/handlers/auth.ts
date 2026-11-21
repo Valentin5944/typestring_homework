@@ -68,13 +68,27 @@ export function createAuthHandler(authService: AuthService): AuthHandler {
         const refreshToken: string | undefined = req.cookies?.["refreshToken"];
 
         try {
-            const accessToken = await authService.refresh(refreshToken);
-            res.cookie("accessToken", accessToken, { ...cookieBase, maxAge: ACCESS_MAX_AGE });
+            const tokens = await authService.refresh(refreshToken);
+            res.cookie("accessToken", tokens.accessToken, { ...cookieBase, maxAge: ACCESS_MAX_AGE });
+            res.cookie("refreshToken", tokens.refreshToken, { ...cookieBase, maxAge: REFRESH_MAX_AGE });
             return res.status(200).json({ message: "refreshed" });
         } catch (error) {
             return sendError(res, error);
         }
     }
+
+    async function handleLogout(req: Request, res: Response): Promise<void | Response> {
+        const refreshToken: string | undefined = req.cookies?.["refreshToken"];
+
+        try {
+            await authService.logout(refreshToken);
+            res.clearCookie("accessToken", cookieBase);
+            res.clearCookie("refreshToken", cookieBase);
+            return res.status(200).json({ message: "Logged out" });
+        } catch (error) {
+            return sendError(res, error);
+    }
+}
 
     async function handleGetMe(req: AuthenticatedRequest, res: Response): Promise<void | Response> {
         if (!req.user) {
@@ -83,5 +97,5 @@ export function createAuthHandler(authService: AuthService): AuthHandler {
         return res.json({ id: req.user.userId, email: req.user.email });
     }
 
-    return { handleRegister, handleLogin, handleRefresh, handleGetMe };
+    return { handleRegister, handleLogin, handleRefresh, handleGetMe, handleLogout };
 }

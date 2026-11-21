@@ -1,5 +1,5 @@
-import type { Post } from "../domen/post/entity.js";
-import type { PublicUser } from "../domen/user/entity.js";
+import type { Post } from "../domain/post/entity.js";
+import type { PublicUser } from "../domain/user/entity.js";
 import type { CreatePostRequest, LoginRequest, RegisterRequest } from "../transport/dto/requests.js";
 
 export interface PostService {
@@ -16,5 +16,10 @@ export interface LoginResult {
 export interface AuthService {
     register(data: RegisterRequest): Promise<PublicUser>;
     login(data: LoginRequest): Promise<LoginResult>;
-    refresh(refreshToken?: string): Promise<string>;
+    refresh(refreshToken?: string): Promise<RefreshResult>;
+    logout(refreshToken?: string): Promise<void>;
+}
+export interface RefreshResult {
+    accessToken: string;
+    refreshToken: string;
 }
