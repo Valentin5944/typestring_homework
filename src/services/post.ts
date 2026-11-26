@@ -1,8 +1,8 @@
-import type { PostRepository } from "../domen/post/repositories.js";
+import type { PostRepository } from "../domain/post/repositories.js";
 import type { CreatePostRequest } from "../transport/dto/requests.js";
 import type { PostService } from "./service.types.js";
-import type { Post } from "../domen/post/entity.js";
-import type { UserRepository } from "../domen/user/repositories.js";
+import type { Post } from "../domain/post/entity.js";
+import type { UserRepository } from "../domain/user/repositories.js";
 import { appError } from "./auth.js";
 
 

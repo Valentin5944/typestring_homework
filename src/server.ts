@@ -11,6 +11,7 @@ import { createAuthRouter } from "./transport/routers/auth.js";
 import { createUserRepository } from "./repositories/user.js";
 import { createAuthService } from "./services/auth.js";
 import { createAuthHandler } from "./transport/handlers/auth.js";
+import { createRefreshSessionRepository } from "./repositories/refreshSession.js";
 
 
 const app = express();
@@ -23,7 +24,8 @@ const postRepository = createPostRepository(db);
 const postService = createPostService(postRepository, userRepository);
 const postHandler = createPostHandler(postService);
 const postRouter = createPostRouter(postHandler);
-const authService = createAuthService(userRepository);
+const refreshSessionRepository = createRefreshSessionRepository(db);
+const authService = createAuthService(userRepository, refreshSessionRepository);
 const authHandler = createAuthHandler(authService);
 const authRouter = createAuthRouter(authHandler);
 

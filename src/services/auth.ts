@@ -1,8 +1,9 @@
-import type { UserRepository } from "../domen/user/repositories.js";
-import type { PublicUser } from "../domen/user/entity.js";
-import type { AuthService, LoginResult } from "./service.types.js";
+import type { UserRepository } from "../domain/user/repositories.js";
+import type { PublicUser } from "../domain/user/entity.js";
+import type { AuthService, LoginResult, RefreshResult} from "./service.types.js";
 import type { LoginRequest, RegisterRequest } from "../transport/dto/requests.js";
-import {hashPassword,verifyPassword,generateAccessToken, generateRefreshToken, verifyRefreshToken} from "../lib/auth.js";
+import {hashPassword,verifyPassword,generateAccessToken,generateRefreshToken,verifyRefreshToken, hashRefreshToken,REFRESH_EXPIRE } from "../lib/auth.js";
+import type { RefreshSessionRepository } from "../domain/refreshSession/repositories.js";
 
 export interface appError {
     status: number;
@@ -15,7 +16,18 @@ export function appError(status: number, message: string): appError {
 
 const trimEmail = (email: string): string => email.trim().toLowerCase();
 
-export function createAuthService(userRepository: UserRepository): AuthService {
+export function createAuthService(
+    userRepository: UserRepository,
+    refreshSessionRepository: RefreshSessionRepository
+): AuthService {
+    const saveSession = async (userId: number, refreshToken: string): Promise<void> => {
+        await refreshSessionRepository.create({
+            userId,
+            tokenHash: hashRefreshToken(refreshToken),
+            expiresAt: new Date(Date.now() + REFRESH_EXPIRE* 1000),
+        });
+    };
+
     const register = async (data: RegisterRequest): Promise<PublicUser> => {
         const email = trimEmail(data.email);
 
@@ -37,30 +49,58 @@ export function createAuthService(userRepository: UserRepository): AuthService {
             throw appError(401, "Invalid email or password");
         }
 
+        const refreshToken = generateRefreshToken(user.id, user.email);
+        await saveSession(user.id, refreshToken);
+
         return {
             user: { id: user.id, email: user.email },
             accessToken: generateAccessToken(user.id, user.email),
-            refreshToken: generateRefreshToken(user.id, user.email)
+            refreshToken,
         };
     };
 
-    const refresh = async (refreshToken?: string): Promise<string> => {
+    const refresh = async (refreshToken?: string): Promise<RefreshResult> => {
         if (!refreshToken) {
             throw appError(401, "Refresh token not provided");
         }
 
         const decoded = verifyRefreshToken(refreshToken);
         if (!decoded) {
-            throw appError(401, "Refresh token invalid");
+        throw appError(401, "Refresh token invalid");
+        }
+
+        const oldTokenHash = hashRefreshToken(refreshToken);
+        const session = await refreshSessionRepository.findByHash(oldTokenHash);
+        if (!session) {
+            throw appError(401, "Refresh token already used or revoked");
         }
 
         const user = await userRepository.findById(decoded.userId);
         if (!user) {
             throw appError(401, "User not found");
-        }
+    }
 
-        return generateAccessToken(user.id, user.email);
+        await refreshSessionRepository.deleteByHash(oldTokenHash);
+        const newRefreshToken = generateRefreshToken(user.id, user.email);
+        const newTokenHash = hashRefreshToken(newRefreshToken);
+        await refreshSessionRepository.create({
+            userId: user.id,
+            tokenHash: newTokenHash,
+            expiresAt: new Date(Date.now() + REFRESH_EXPIRE* 1000),
+        });
+
+        return {
+            accessToken: generateAccessToken(user.id, user.email),
+            refreshToken: newRefreshToken,
+        };
     };
 
-    return { register, login, refresh };
+    const logout = async (refreshToken?: string): Promise<void> => {
+        if (!refreshToken) {
+            return;
+        }
+        await refreshSessionRepository.deleteByHash(hashRefreshToken(refreshToken));
+    };
+
+    return { register, login, refresh, logout };
 }
